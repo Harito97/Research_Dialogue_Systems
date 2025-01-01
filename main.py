@@ -1,3 +1,4 @@
+import time
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Tắt các thông báo từ TensorFlow (0=DEBUG, 1=INFO, 2=WARNING, 3=ERROR)
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -25,6 +26,7 @@ def main():
 
     dataset = MultiWOZ_2_2()
 
+    start_time = time.time()
     if args.tasks == "download_data":
         parser.add_argument(
             "--data_dir",
@@ -38,6 +40,7 @@ def main():
 
         dataset.download_data(args.data_dir)
         print("Downloaded the raw data of MultiWOZ 2.2 dataset in", args.data_dir)
+        print("Time taken:", time.time() - start_time)
         return 0
 
     if args.tasks == "process_and_save":
@@ -60,6 +63,7 @@ def main():
         print(
             "Processed and saved the raw data of MultiWOZ 2.2 dataset in", args.des_dir
         )
+        print("Time taken:", time.time() - start_time)
         return 0
 
     if args.tasks == "load_process_and_train":
@@ -99,6 +103,7 @@ def main():
         # Write history to log file
         with open(f"./results/logs/history.log", "w") as f:
             f.write(str(history.history))
+        print("Time taken:", time.time() - start_time)
         return 0
 
     if args.tasks == "evaluate":
@@ -126,6 +131,7 @@ def main():
         model.evaluate(
             dataset.X_test_bert, dataset.y_test_padded_one_hot, dataset.y_act_test_one_hot
         )
+        print("Time taken:", time.time() - start_time)
         return 0
 
     if args.tasks == "demo":
@@ -162,10 +168,11 @@ def main():
             print("Predicted Dialogue Acts:", predicted_acts)
 
             print("\n")  # Add a new line for better readability
-
+        print("Time taken:", time.time() - start_time)
         return 0
-    
+
     print("Invalid tasks. Please choose from [download_data, process_and_save, load_process_and_train, evaluate, demo].")
+    print("Time taken:", time.time() - start_time)
     return 1
 
 if __name__ == "__main__":
@@ -212,4 +219,3 @@ if __name__ == "__main__":
 #     # Eg. python main.py --tasks "[split2.4]" --data_dir "./data/raw/MULTIWOZ2.4"
 #     # Eg. python main.py --tasks "[split2.4]" --data_dir "./data/raw/MULTIWOZ2.4" --des_dir "./data/processed/MULTIWOZ2.4"
 #     main()
-
