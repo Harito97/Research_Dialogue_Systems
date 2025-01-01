@@ -30,6 +30,15 @@ This repository is ideal for anyone interested in natural language processing (N
 
 ```bash
 pip install -r requirements.txt
+nohup python main.py --tasks download_data > download_data.log 2>&1 &
+nohup python main.py --tasks process_and_save > process_and_save.log 2>&1 &
+nohup python main.py --tasks load_process_and_train > load_process_and_train.log 2>&1 &
+nohup python main.py --tasks evaluate > evaluate.log 2>&1 &
+nohup python main.py --tasks demo #> demo.log 2>&1 &
+```
+
+Or:
+```bash
 python main.py --tasks download_data
 # Args = Namespace(tasks='download_data', data_dir='./data/dataset_multiwoz_2_2.json')
 # Downloading the raw data of MultiWOZ 2.2 dataset...
