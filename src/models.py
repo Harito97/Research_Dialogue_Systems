@@ -20,7 +20,8 @@ class S2_Model:
             # Sử dụng TinyBERT
             bert_model_name = "huawei-noah/TinyBERT_General_4L_312D"
             bert_model = TFBertModel.from_pretrained(bert_model_name, from_pt=True)
-        embedding = bert_model(input_seq)[0]
+        # Ensure input_seq is a TensorFlow tensor before feeding to bert_model
+        embedding = bert_model(tf.cast(input_seq, dtype=tf.int32))[0]
         bilstm = Bidirectional(LSTM(embedding_dim, return_sequences=True))(embedding) # Tăng số units
         bilstm = Dropout(dropout_rate)(bilstm) # Thêm dropout
 
