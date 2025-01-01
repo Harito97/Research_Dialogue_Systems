@@ -11,6 +11,7 @@ from transformers import logging
 logging.set_verbosity_error()
 from transformers import BertTokenizer, TFBertModel
 import os
+import keras.backend as K
 
 class S2_Model:
     def __init__(self, max_sequence_length, num_classes_slot, num_classes_act, bert_model, embedding_dim:int=128, dropout_rate:float=0.2):
