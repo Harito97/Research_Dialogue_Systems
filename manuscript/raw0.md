@@ -170,20 +170,24 @@ Dữ liệu của các tập train, validation và test trong MultiWOZ 2.2 đư�
 
 Nhận xét: Hình ảnh biểu thị số lượng mẫu trong từng tập dữ liệu (train, validation, test) một cách trực quan. Cụ thể, tập train có số lượng mẫu lớn nhất với gần 9,000 mẫu, trong khi các tập validation và test có số lượng mẫu nhỏ hơn nhiều, chỉ khoảng 1,000 mẫu mỗi tập. Sự chênh lệch này cho thấy rằng việc huấn luyện mô hình sẽ có nhiều dữ liệu hơn để học hỏi, trong khi việc đánh giá hiệu suất có thể gặp khó khăn do số lượng mẫu hạn chế trong các tập validation và test. Điều này cũng có thể ảnh hưởng đến tính chính xác của việc đánh giá mô hình nếu không được thực hiện cẩn thận.
 
-Cac domain trong MultiWOZ 2.2 bao gom:
-- **restaurant**
-- **hotel**
-- **attraction**
-- **train**
-- **taxi**
-- **hospital**
-- **police**
-- **bus**
-- **booking**
-- **general**
+Các miền trong MultiWOZ 2.2 bao gồm:
 
-Va cac domain do duoc giao nhau giua 3 tap train, validation va test nhu sau:
-![Domains train, validation, test](../notebooks/service_overlap.png)
+  - Nhà hàng (restaurant)
+  - Khách sạn (hotel)
+  - Điểm tham quan (attraction)
+  - Tàu (train)
+  - Taxi (taxi)
+  - Bệnh viện (hospital)
+  - Cảnh sát (police)
+  - Xe buýt (bus)
+  - Đặt chỗ (booking)
+  - Thông tin chung (general)
+
+Sự giao nhau giữa các miền này trong ba tập dữ liệu train, validation và test được thể hiện trong hình dưới đây:
+
+![Sự giao nhau giữa các miền trong các tập dữ liệu][]
+
+Hình ảnh minh họa sự chồng chéo giữa các miền trong các tập dữ liệu train, validation và test.
 
 Act type co nhung kieu nhu la:
 - **inform**

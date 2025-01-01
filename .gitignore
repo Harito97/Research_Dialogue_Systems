@@ -2,3 +2,5 @@ temp*
 *.json
 *.zip
 glove*
+*.env
+pycache

@@ -28,6 +28,8 @@ This repository is ideal for anyone interested in natural language processing (N
 
 ## Guide to run
 
+### Use simple method (need to train)
+
 ```bash
 pip install -r requirements.txt
 nohup python main.py --tasks download_data > download_data.log 2>&1 &
@@ -52,3 +54,38 @@ python main.py --tasks demo
 python main.py --tasks process_and_save && python main.py --tasks load_process_and_train && python main.py --tasks evaluate && python main.py --tasks demo #&
 ```
 
+### Use LLM model (no need to train)
+```bash
+# Remember the GEMINI api key
+python main.py --tasks use_llm
+```
+
+## S1 & S2 model structure
+
+```markdown
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)        ┃ Output Shape      ┃    Param # ┃ Connected to      ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+│ input_layer         │ (None, 20, 312)   │          0 │ -                 │
+│ (InputLayer)        │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ bidirectional       │ (None, 20, 256)   │    451,584 │ input_layer[0][0] │
+│ (Bidirectional)     │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dropout (Dropout)   │ (None, 20, 256)   │          0 │ bidirectional[0]… │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ global_average_poo… │ (None, 256)       │          0 │ dropout[0][0]     │
+│ (GlobalAveragePool… │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ dropout_1 (Dropout) │ (None, 256)       │          0 │ global_average_p… │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ slot_output         │ (None, 20, 53)    │     13,621 │ dropout[0][0]     │
+│ (TimeDistributed)   │                   │            │                   │
+├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+│ action_output       │ (None, 24)        │      6,168 │ dropout_1[0][0]   │
+│ (Dense)             │                   │            │                   │
+└─────────────────────┴───────────────────┴────────────┴───────────────────┘
+ Total params: 471,373 (1.80 MB)
+ Trainable params: 471,373 (1.80 MB)
+ Non-trainable params: 0 (0.00 B)
+```

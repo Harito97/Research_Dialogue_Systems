@@ -1,15 +1,5 @@
 import time
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Tắt các thông báo từ TensorFlow (0=DEBUG, 1=INFO, 2=WARNING, 3=ERROR)
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-import warnings
-warnings.filterwarnings("ignore")
-import logging
-logging.basicConfig(level=logging.ERROR)
 import argparse
-from src.preprocess import MultiWOZ_2_2
-from src.models import S2_Model
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -19,16 +9,35 @@ def main():
         "--tasks",
         type=str,
         default="",
-        help="Tasks to perform: [download_data, process_and_save, load_process_and_train, evaluate, demo]",
+        help="Tasks to perform: [download_data, process_and_save, load_process_and_train, evaluate, demo, use_llm]",
     )
 
     args = parser.parse_args()  # Move this line before checking args.tasks
 
+
+    start_time = time.time()
+    if args.tasks == "use_llm":
+        from src.llm_model import LLM_Model
+        llm_model = LLM_Model()
+        llm_model.main()
+        print("Time taken:", time.time() - start_time)
+        return 0
+    
+    # Import
+    import os
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Tắt các thông báo từ TensorFlow (0=DEBUG, 1=INFO, 2=WARNING, 3=ERROR)
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    import warnings
+    warnings.filterwarnings("ignore")
+    import logging
+    logging.basicConfig(level=logging.ERROR)
+    from src.preprocess import MultiWOZ_2_2
+    from src.models import S2_Model
+    # ---
+
     dataset = MultiWOZ_2_2()
     dataset.setup_hyperparameters()
     dataset.setup_embedding()
-
-    start_time = time.time()
     if args.tasks == "download_data":
         parser.add_argument(
             "--data_dir",
@@ -110,9 +119,6 @@ def main():
         )
         print("Saving the model S2")
         model.save("./results/models/s2_model.keras")
-        # Write history to log file
-        with open(f"./results/logs/history.log", "w") as f:
-            f.write(str(history.history))
         print("Time taken:", time.time() - start_time)
         return 0
 
@@ -153,40 +159,41 @@ def main():
         return 0
 
     if args.tasks == "demo":
-        print("Loading the model S2")
-        model = S2_Model(
-            max_sequence_length=dataset.MAX_SEQUENCE_LENGTH,
-            num_classes_slot=dataset.NUM_CLASSES_SLOT,
-            num_classes_act=dataset.NUM_CLASSES_ACT,
-            bert_model=dataset.bert_model,
-            embedding_dim=dataset.EMBEDDING_DIM,
-            dropout_rate=0.2,
-        )
-        model.load("./results/models/s2_model.keras")
-        print("Demo the model S2 (type 'quit' or 'q' to exit)")
+        print("Waiting add embedding layer to model or use embedding layer from BERT then pass the model.")
+        # print("Loading the model S2")
+        # model = S2_Model(
+        #     max_sequence_length=dataset.MAX_SEQUENCE_LENGTH,
+        #     num_classes_slot=dataset.NUM_CLASSES_SLOT,
+        #     num_classes_act=dataset.NUM_CLASSES_ACT,
+        #     bert_model=dataset.bert_model,
+        #     embedding_dim=dataset.EMBEDDING_DIM,
+        #     dropout_rate=0.2,
+        # )
+        # model.load("./results/models/s2_model.keras")
+        # print("Demo the model S2 (type 'quit' or 'q' to exit)")
 
-        while True:
-            user_input = input("Enter your text (or type 'quit' or 'q' to exit): ")
-            if user_input.lower() in ("quit", "q"):
-                break
+        # while True:
+        #     user_input = input("Enter your text (or type 'quit' or 'q' to exit): ")
+        #     if user_input.lower() in ("quit", "q"):
+        #         break
 
-            # Preprocess the user input (assuming dataset has preprocess_text function)
-            preprocessed_text = dataset.preprocess_text(user_input)
-            user_input_tensor = np.expand_dims(preprocessed_text, axis=0)
+        #     # Preprocess the user input (assuming dataset has preprocess_text function)
+        #     preprocessed_text = dataset.preprocess_text(user_input)
+        #     user_input_tensor = np.expand_dims(preprocessed_text, axis=0)
 
-            # Get predictions
-            slot_predictions, act_predictions = model.predict(user_input_tensor)
+        #     # Get predictions
+        #     slot_predictions, act_predictions = model.predict(user_input_tensor)
 
-            # Convert predictions to labels (optional)
-            predicted_slots = dataset.decode_predictions(slot_predictions[0])
-            predicted_acts = dataset.decode_act_predictions(act_predictions[0])
+        #     # Convert predictions to labels (optional)
+        #     predicted_slots = dataset.decode_predictions(slot_predictions[0])
+        #     predicted_acts = dataset.decode_act_predictions(act_predictions[0])
 
-            # Print the results
-            print("Predicted Slots:", predicted_slots)
-            print("Predicted Dialogue Acts:", predicted_acts)
+        #     # Print the results
+        #     print("Predicted Slots:", predicted_slots)
+        #     print("Predicted Dialogue Acts:", predicted_acts)
 
-            print("\n")  # Add a new line for better readability
-        print("Time taken:", time.time() - start_time)
+        #     print("\n")  # Add a new line for better readability
+        # print("Time taken:", time.time() - start_time)
         return 0
 
     print("Invalid tasks. Please choose from [download_data, process_and_save, load_process_and_train, evaluate, demo].")

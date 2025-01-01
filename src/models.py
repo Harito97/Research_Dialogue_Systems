@@ -2,35 +2,70 @@ import json
 import re
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding, LSTM, Bidirectional, Dense, TimeDistributed, GlobalAveragePooling1D, Input, Dropout
-from tensorflow.keras.models import Model, load_model # Import load_model
+from tensorflow.keras.layers import (
+    Embedding,
+    LSTM,
+    Bidirectional,
+    Dense,
+    TimeDistributed,
+    GlobalAveragePooling1D,
+    Input,
+    Dropout,
+)
+from tensorflow.keras.models import Model, load_model  # Import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.utils import to_categorical
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from transformers import logging
+
 logging.set_verbosity_error()
 from transformers import BertTokenizer, TFBertModel
 import os
 from tensorflow.keras.layers import Input, Lambda
+import os
 
 class S2_Model:
-    def __init__(self, max_sequence_length, num_classes_slot, num_classes_act, bert_model, embedding_dim:int=128, dropout_rate:float=0.2):
+    def __init__(
+        self,
+        max_sequence_length,
+        num_classes_slot,
+        num_classes_act,
+        bert_model,
+        embedding_dim: int = 128,
+        dropout_rate: float = 0.2,
+    ):
         # Model (Sử dụng BERT embedding và dropout)
-        input_seq = Input(shape=(max_sequence_length, 312,), dtype="int32")
+        input_seq = Input(
+            shape=(
+                max_sequence_length,
+                312,
+            ),
+            dtype="int32",
+        )
         # embedding = bert_model(input_seq)[0]
         # Sử dụng Lambda layer để ép kiểu
         # input_seq_casted = Lambda(lambda x: tf.cast(x, dtype=tf.int32))(input_seq)
 
         # embedding = bert_model(input_seq_casted)[0]
         # bilstm = Bidirectional(LSTM(embedding_dim, return_sequences=True))(embedding) # Tăng số units
-        bilstm = Bidirectional(LSTM(embedding_dim, return_sequences=True))(input_seq) # Tăng số units
-        bilstm = Dropout(dropout_rate)(bilstm) # Thêm dropout
+        bilstm = Bidirectional(LSTM(embedding_dim, return_sequences=True))(
+            input_seq
+        )  # Tăng số units
+        bilstm = Dropout(dropout_rate)(bilstm)  # Thêm dropout
 
-        slot_output = TimeDistributed(Dense(num_classes_slot, activation="softmax"), name="slot_output")(bilstm)
+        slot_output = TimeDistributed(
+            Dense(num_classes_slot, activation="softmax"), name="slot_output"
+        )(bilstm)
 
         sentence_representation = GlobalAveragePooling1D()(bilstm)
-        sentence_representation = Dropout(dropout_rate)(sentence_representation) # Thêm dropout
-        action_output = Dense(num_classes_act, activation="sigmoid", name="action_output")(sentence_representation) # Sigmoid cho multi-label
+        sentence_representation = Dropout(dropout_rate)(
+            sentence_representation
+        )  # Thêm dropout
+        action_output = Dense(
+            num_classes_act, activation="sigmoid", name="action_output"
+        )(
+            sentence_representation
+        )  # Sigmoid cho multi-label
 
         self.model = Model(inputs=input_seq, outputs=[slot_output, action_output])
 
@@ -40,13 +75,13 @@ class S2_Model:
             optimizer="adam",
             loss={
                 "slot_output": "categorical_crossentropy",
-                "action_output": "binary_crossentropy", # Binary crossentropy cho multi-label
+                "action_output": "binary_crossentropy",  # Binary crossentropy cho multi-label
             },
-            loss_weights={
-                "slot_output": 1.0,
-                "action_output": 1.0
-            },
-            metrics={"slot_output": ["accuracy"], "action_output": ["binary_accuracy"]}, # Binary accuracy cho multi-label
+            loss_weights={"slot_output": 1.0, "action_output": 1.0},
+            metrics={
+                "slot_output": ["accuracy"],
+                "action_output": ["binary_accuracy"],
+            },  # Binary accuracy cho multi-label
         )
 
         print(self.model.summary())
@@ -64,15 +99,28 @@ class S2_Model:
     #     )
     #     return history
 
-    def train(self, X_train_bert, y_train_padded_one_hot, y_act_one_hot, X_val_bert, y_val_padded_one_hot, y_act_val_one_hot, slot_class_weights_dict, act_class_weights_dict, save_dir="."):
+    def train(
+        self,
+        X_train_bert,
+        y_train_padded_one_hot,
+        y_act_one_hot,
+        X_val_bert,
+        y_val_padded_one_hot,
+        y_act_val_one_hot,
+        slot_class_weights_dict,
+        act_class_weights_dict,
+        save_dir=".",
+    ):
         # Huấn luyện mô hình
 
         # Define a callback to save the model after each epoch
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=os.path.join(save_dir, "model_{epoch:02d}.keras"),  # Use epoch number in filename
+            filepath=os.path.join(
+                save_dir, "model_{epoch:02d}.keras"
+            ),  # Use epoch number in filename
             monitor="val_loss",  # Monitor validation loss for automatic saving of best model
             save_best_only=True,  # Overwrite only if validation loss improves
-            mode="min"  # Save the model with the lowest validation loss
+            mode="min",  # Save the model with the lowest validation loss
         )
 
         history = self.model.fit(
@@ -83,7 +131,9 @@ class S2_Model:
             batch_size=32,
             # class_weight=[slot_class_weights_dict, act_class_weights_dict]
             # ValueError: `class_weight` is only supported for Models with a single output.
-            callbacks=[model_checkpoint_callback]  # Add the callback to the fit function
+            callbacks=[
+                model_checkpoint_callback
+            ],  # Add the callback to the fit function
         )
         return history
 
@@ -101,20 +151,32 @@ class S2_Model:
         y_true_slot_flatten = y_true_slot_labels.reshape(-1)
 
         print("Slot Classification Metrics:")
-        print(classification_report(y_true_slot_flatten, y_pred_slot_flatten, zero_division=0))
+        print(
+            classification_report(
+                y_true_slot_flatten, y_pred_slot_flatten, zero_division=0
+            )
+        )
 
-        y_pred_action_labels = (y_pred_action > 0.5).astype(int) # Ngưỡng 0.5 cho sigmoid
+        y_pred_action_labels = (y_pred_action > 0.5).astype(
+            int
+        )  # Ngưỡng 0.5 cho sigmoid
         print("Action Classification Metrics:")
-        print(multilabel_confusion_matrix(y_test_act_one_hot, y_pred_action_labels, zero_division=0))
+        print(
+            multilabel_confusion_matrix(
+                y_test_act_one_hot, y_pred_action_labels, zero_division=0
+            )
+        )
 
     def save(self, path: str = "./results/models/s2_model.keras"):
-            """Saves the current model to the specified path."""
-            try:
-                os.makedirs(os.path.dirname(path), exist_ok=True) # Tạo thư mục nếu chưa tồn tại
-                self.model.save(path)
-                print(f"Model saved to {path}")
-            except Exception as e:
-                print(f"Error saving model: {e}")
+        """Saves the current model to the specified path."""
+        try:
+            os.makedirs(
+                os.path.dirname(path), exist_ok=True
+            )  # Tạo thư mục nếu chưa tồn tại
+            self.model.save(path)
+            print(f"Model saved to {path}")
+        except Exception as e:
+            print(f"Error saving model: {e}")
 
     def load(self, path: str = "./results/models/s2_model.keras"):
         """Loads a pre-trained model from the specified path."""
@@ -128,3 +190,4 @@ class S2_Model:
             print(f"An error occurred during model loading: {e}")
             return False
         return True
+
