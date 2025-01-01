@@ -17,7 +17,9 @@ class S2_Model:
         # Model (Sử dụng BERT embedding và dropout)
         input_seq = Input(shape=(max_sequence_length,), dtype="int32")
         # embedding = bert_model(input_seq)[0]
-        embedding = bert_model(tf.cast(input_seq, dtype=tf.int32))[0] # Cast input_seq sang tf.int32
+        # Ensure input_seq is a TensorFlow tensor using Keras operation
+        input_seq_casted = K.cast(input_seq, dtype=tf.int32)
+        embedding = bert_model(input_seq_casted)[0]
         bilstm = Bidirectional(LSTM(embedding_dim, return_sequences=True))(embedding) # Tăng số units
         bilstm = Dropout(dropout_rate)(bilstm) # Thêm dropout
 
