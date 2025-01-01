@@ -109,7 +109,7 @@ def main():
             dataset.act_class_weights_dict,
         )
         print("Saving the model S2")
-        model.model.save("./results/models/s2_model.keras")
+        model.save("./results/models/s2_model.keras")
         # Write history to log file
         with open(f"./results/logs/history.log", "w") as f:
             f.write(str(history.history))

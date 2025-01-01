@@ -51,16 +51,39 @@ class S2_Model:
 
         print(self.model.summary())
 
-    def train(self, X_train_bert, y_train_padded_one_hot, y_act_one_hot, X_val_bert, y_val_padded_one_hot, y_act_val_one_hot, slot_class_weights_dict, act_class_weights_dict):
+    # def train(self, X_train_bert, y_train_padded_one_hot, y_act_one_hot, X_val_bert, y_val_padded_one_hot, y_act_val_one_hot, slot_class_weights_dict, act_class_weights_dict):
+    #     # Huấn luyện mô hình
+    #     history = self.model.fit(
+    #         X_train_bert,
+    #         [y_train_padded_one_hot, y_act_one_hot],
+    #         validation_data=(X_val_bert, [y_val_padded_one_hot, y_act_val_one_hot]),
+    #         epochs=10,
+    #         batch_size=32,
+    #         # class_weight=[slot_class_weights_dict, act_class_weights_dict]
+    #         # ValueError: `class_weight` is only supported for Models with a single output.
+    #     )
+    #     return history
+
+    def train(self, X_train_bert, y_train_padded_one_hot, y_act_one_hot, X_val_bert, y_val_padded_one_hot, y_act_val_one_hot, slot_class_weights_dict, act_class_weights_dict, save_dir="."):
         # Huấn luyện mô hình
+
+        # Define a callback to save the model after each epoch
+        model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=os.path.join(save_dir, "model_{epoch:02d}.keras"),  # Use epoch number in filename
+            monitor="val_loss",  # Monitor validation loss for automatic saving of best model
+            save_best_only=True,  # Overwrite only if validation loss improves
+            mode="min"  # Save the model with the lowest validation loss
+        )
+
         history = self.model.fit(
             X_train_bert,
             [y_train_padded_one_hot, y_act_one_hot],
             validation_data=(X_val_bert, [y_val_padded_one_hot, y_act_val_one_hot]),
-            epochs=20, # Tăng số epochs
+            epochs=10,
             batch_size=32,
             # class_weight=[slot_class_weights_dict, act_class_weights_dict]
             # ValueError: `class_weight` is only supported for Models with a single output.
+            callbacks=[model_checkpoint_callback]  # Add the callback to the fit function
         )
         return history
 
