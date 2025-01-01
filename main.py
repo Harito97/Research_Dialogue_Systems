@@ -25,6 +25,8 @@ def main():
     args = parser.parse_args()  # Move this line before checking args.tasks
 
     dataset = MultiWOZ_2_2()
+    dataset.setup_hyperparameters()
+    dataset.setup_embedding()
 
     start_time = time.time()
     if args.tasks == "download_data":
@@ -76,22 +78,22 @@ def main():
         args = parser.parse_args()
         print(f"Args = {args}")
         print("Loading the model S2")
-        # model = S2_Model(
-        #     max_sequence_length=dataset.MAX_SEQUENCE_LENGTH,
-        #     num_classes_slot=dataset.NUM_CLASSES_SLOT,
-        #     num_classes_act=dataset.NUM_CLASSES_ACT,
-        #     bert_model=None,
-        #     embedding_dim=dataset.EMBEDDING_DIM,
-        #     dropout_rate=0.2,
-        # )
         model = S2_Model(
-            max_sequence_length=20,
-            num_classes_slot=53,
-            num_classes_act=24,
-            bert_model=None,
-            embedding_dim=128,
+            max_sequence_length=dataset.MAX_SEQUENCE_LENGTH,
+            num_classes_slot=dataset.NUM_CLASSES_SLOT,
+            num_classes_act=dataset.NUM_CLASSES_ACT,
+            bert_model=dataset.bert_model,
+            embedding_dim=dataset.EMBEDDING_DIM,
             dropout_rate=0.2,
         )
+        # model = S2_Model(
+        #     max_sequence_length=20,
+        #     num_classes_slot=53,
+        #     num_classes_act=24,
+        #     bert_model=None,
+        #     embedding_dim=128,
+        #     dropout_rate=0.2,
+        # )
         model.compile_summary()
         print("Loading the processed data of MultiWOZ 2.2 dataset...")
         dataset.load_data(args.data_dir, load_train=True, load_val=True, load_test=False)
@@ -124,22 +126,22 @@ def main():
         args = parser.parse_args()
         print(f"Args = {args}")
         print("Loading the model S2")
-        # model = S2_Model(
-        #     max_sequence_length=dataset.MAX_SEQUENCE_LENGTH,
-        #     num_classes_slot=dataset.NUM_CLASSES_SLOT,
-        #     num_classes_act=dataset.NUM_CLASSES_ACT,
-        #     bert_model=None,
-        #     embedding_dim=dataset.EMBEDDING_DIM,
-        #     dropout_rate=0.2,
-        # )
         model = S2_Model(
-            max_sequence_length=20,
-            num_classes_slot=53,
-            num_classes_act=24,
-            bert_model=None,
-            embedding_dim=128,
+            max_sequence_length=dataset.MAX_SEQUENCE_LENGTH,
+            num_classes_slot=dataset.NUM_CLASSES_SLOT,
+            num_classes_act=dataset.NUM_CLASSES_ACT,
+            bert_model=dataset.bert_model,
+            embedding_dim=dataset.EMBEDDING_DIM,
             dropout_rate=0.2,
         )
+        # model = S2_Model(
+        #     max_sequence_length=20,
+        #     num_classes_slot=53,
+        #     num_classes_act=24,
+        #     bert_model=None,
+        #     embedding_dim=128,
+        #     dropout_rate=0.2,
+        # )
         print("Loading the processed data of MultiWOZ 2.2 dataset...")
         dataset.load_data(args.data_dir, load_train=False, load_val=False, load_test=True)
         model.load("./results/models/s2_model.keras")
