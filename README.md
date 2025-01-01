@@ -48,7 +48,7 @@ python main.py --tasks process_and_save
 python main.py --tasks load_process_and_train
 python main.py --tasks evaluate
 python main.py --tasks demo
+
+python main.py --tasks process_and_save && python main.py --tasks load_process_and_train && python main.py --tasks evaluate && python main.py --tasks demo #&
 ```
 
-python main.py --tasks process_and_save && python main.py --tasks load_process_and_train && python main.py --tasks evaluate && python main.py --tasks demo
-#&

@@ -59,7 +59,8 @@ class S2_Model:
             validation_data=(X_val_bert, [y_val_padded_one_hot, y_act_val_one_hot]),
             epochs=20, # Tăng số epochs
             batch_size=32,
-            class_weight=[slot_class_weights_dict, act_class_weights_dict]
+            # class_weight=[slot_class_weights_dict, act_class_weights_dict]
+            # ValueError: `class_weight` is only supported for Models with a single output.
         )
         return history
 
