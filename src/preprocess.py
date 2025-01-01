@@ -106,7 +106,7 @@ class MultiWOZ_2_2:
 
             You can use the following methods step by step:
             - self.download_data(data_path:str='./dataset_multiwoz.json')
-            - self.setup_hyperparameters(max_seq_length:int=50, embedding_dim:int=100)
+            - self.setup_hyperparameters(max_seq_length:int=50, embedding_dim:int=128)
             - self.get_raw_data(data_path:str='dataset_multiwoz.json')
             - self.get_clean_data_and_weight_classes()
             """
@@ -385,21 +385,25 @@ class MultiWOZ_2_2:
         except Exception as e:
             print(f"Error saving data: {e}")
 
-    def load_data(self, load_path: str = './data/multiwmultiwoz_2_2_processed_data.json'):
+    def load_data(self, load_path: str = './data/multiwmultiwoz_2_2_processed_data.json', load_train: bool = False, load_val: bool = False, load_test: bool = False):
         try:
             print(f"Loading data from {load_path}")
             with open(load_path, 'r') as f:
                 data_loaded = json.load(f)
 
-            self.X_train_bert = tf.constant(data_loaded['X_train_bert'], dtype=tf.float32) # Convert back to tensors, specify dtype
-            self.X_val_bert = tf.constant(data_loaded['X_val_bert'], dtype=tf.float32)
-            self.X_test_bert = tf.constant(data_loaded['X_test_bert'], dtype=tf.float32)
-            self.y_train_padded_one_hot = np.array(data_loaded['y_train_padded_one_hot'])
-            self.y_val_padded_one_hot = np.array(data_loaded['y_val_padded_one_hot'])
-            self.y_test_padded_one_hot = np.array(data_loaded['y_test_padded_one_hot'])
-            self.y_act_one_hot = np.array(data_loaded['y_act_one_hot'])
-            self.y_act_val_one_hot = np.array(data_loaded['y_act_val_one_hot'])
-            self.y_act_test_one_hot = np.array(data_loaded['y_act_test_one_hot'])
+            if load_train:
+                self.X_train_bert = tf.constant(data_loaded['X_train_bert'], dtype=tf.float32) # Convert back to tensors, specify dtype
+                self.y_train_padded_one_hot = np.array(data_loaded['y_train_padded_one_hot'])
+                self.y_act_one_hot = np.array(data_loaded['y_act_one_hot'])
+            if load_val:
+                self.X_val_bert = tf.constant(data_loaded['X_val_bert'], dtype=tf.float32)
+                self.y_val_padded_one_hot = np.array(data_loaded['y_val_padded_one_hot'])
+                self.y_act_val_one_hot = np.array(data_loaded['y_act_val_one_hot'])
+            if load_test:
+                self.X_test_bert = tf.constant(data_loaded['X_test_bert'], dtype=tf.float32)
+                self.y_test_padded_one_hot = np.array(data_loaded['y_test_padded_one_hot'])
+                self.y_act_test_one_hot = np.array(data_loaded['y_act_test_one_hot'])
+
             self.slot_class_weights_dict = data_loaded['slot_class_weights_dict']
             self.act_class_weights_dict = data_loaded['act_class_weights_dict']
             self.MAX_SEQUENCE_LENGTH = data_loaded['MAX_SEQUENCE_LENGTH']

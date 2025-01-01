@@ -16,6 +16,10 @@ class S2_Model:
     def __init__(self, max_sequence_length, num_classes_slot, num_classes_act, bert_model, embedding_dim:int=128, dropout_rate:float=0.2):
         # Model (Sử dụng BERT embedding và dropout)
         input_seq = Input(shape=(max_sequence_length,), dtype="int32")
+        if bert_model is None:
+            # Sử dụng TinyBERT
+            bert_model_name = "huawei-noah/TinyBERT_General_4L_312D"
+            bert_model = TFBertModel.from_pretrained(bert_model_name, from_pt=True)
         embedding = bert_model(input_seq)[0]
         bilstm = Bidirectional(LSTM(embedding_dim, return_sequences=True))(embedding) # Tăng số units
         bilstm = Dropout(dropout_rate)(bilstm) # Thêm dropout

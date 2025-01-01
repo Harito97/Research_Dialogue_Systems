@@ -1,5 +1,5 @@
 ---
-title: "Sipmle Method For Dialogue State Tracking In MultiWOZ 2.2 Dataset"
+title: "Dialogue State Tracking In MultiWOZ 2.2 Dataset"
 author: "Phạm Ngọc Hải"
 date: "27/12/2024"
 fontsize: 12pt
@@ -155,20 +155,58 @@ Trong trường hợp này, DST cần xác định:
 - **Xây Dựng Bộ Dữ Liệu:** Cần phát triển các bộ dữ liệu đa dạng như **MultiWOZ**, **SGD**, **CrossWOZ** để đánh giá toàn diện hơn.
 - **Phát Triển Phương Pháp Đánh Giá Mới:** Tập trung vào các yếu tố như khả năng hiểu ngữ cảnh, xử lý thông tin đa modal và khả năng thích ứng.
 
+
+# Materials
+
+Sự phát triển của các tập dữ liệu hội thoại đa miền quy mô lớn, như MultiWOZ 2.0, đã góp phần thúc đẩy nghiên cứu trong lĩnh vực Hệ thống Đối thoại (DST) một cách đáng kể. Tuy nhiên, các phiên bản ban đầu của MultiWOZ thường chứa nhiều nhiễu trong các chú thích trạng thái, điều này gây khó khăn cho việc đánh giá hiệu suất của các mô hình một cách chính xác và công bằng.
+
+Để khắc phục vấn đề này, MultiWOZ 2.4 đã được giới thiệu như một phiên bản tinh chỉnh của MultiWOZ 2.1, tập trung vào việc sửa chữa các lỗi chú thích trong tập validation và tập test. Nghiên cứu cho thấy rằng MultiWOZ 2.4 mang lại hiệu suất cao hơn cho các mô hình DST tiên tiến, đồng thời tạo ra một môi trường đánh giá chính xác và đáng tin cậy hơn.
+
+Tuy nhiên, do MultiWOZ 2.4 (cùng với 2.3) chưa được nhóm phát hành gốc nhanh chóng cập nhật, nhóm này vẫn đang duy trì và phát triển phiên bản 2.2. Do đó, nghiên cứu này sẽ tập trung vào phiên bản 2.2 của MultiWOZ.
+
+Dữ liệu của các tập train, validation và test trong MultiWOZ 2.2 được giữ nguyên từ trước. Điều này giúp dễ dàng so sánh các kết quả giữa các phiên bản. Thông tin chi tiết về phân chia các tập train, validation và test của MultiWOZ 2.2 được trình bày như sau:
+
+![Số lượng phân chia train, validation, test][]
+
+Nhận xét: Hình ảnh biểu thị số lượng mẫu trong từng tập dữ liệu (train, validation, test) một cách trực quan. Cụ thể, tập train có số lượng mẫu lớn nhất với gần 9,000 mẫu, trong khi các tập validation và test có số lượng mẫu nhỏ hơn nhiều, chỉ khoảng 1,000 mẫu mỗi tập. Sự chênh lệch này cho thấy rằng việc huấn luyện mô hình sẽ có nhiều dữ liệu hơn để học hỏi, trong khi việc đánh giá hiệu suất có thể gặp khó khăn do số lượng mẫu hạn chế trong các tập validation và test. Điều này cũng có thể ảnh hưởng đến tính chính xác của việc đánh giá mô hình nếu không được thực hiện cẩn thận.
+
+Cac domain trong MultiWOZ 2.2 bao gom:
+- **restaurant**
+- **hotel**
+- **attraction**
+- **train**
+- **taxi**
+- **hospital**
+- **police**
+- **bus**
+- **booking**
+- **general**
+
+Va cac domain do duoc giao nhau giua 3 tap train, validation va test nhu sau:
+![Domains train, validation, test](../notebooks/service_overlap.png)
+
+Act type co nhung kieu nhu la:
+- **inform**
+- **request**
+- **recommend**
+- **book**
+- **select**
+- **offer**
+- **nooffer**
+- **nobook**
+- **noresult**
+- **reqmore**
+- **goodbye**
+- **welcome**
+- ...
+
+Phan phoi cua cac act type trong cac tap train, validation, test la:
+![Act type train, validation, test](../notebooks/act_types.png)
+
+Phan phoi cua cac slot trong cac tap train, validation, test la:
+![Slots train, validation, test](../notebooks/slot_types.png)
+
 # Method
-
-Sự phát triển của các tập dữ liệu hội thoại đa miền (multi-domain dialogue datasets) quy mô lớn như MultiWOZ 2.0 đã thúc đẩy đáng kể nghiên cứu về DST. Tuy nhiên, các phiên bản MultiWOZ ban đầu thường chứa nhiễu (noise) trong các chú thích trạng thái, **gây khó khăn** cho việc đánh giá hiệu suất mô hình một cách chính xác và công bằng.
-Để giải quyết vấn đề này, MultiWOZ 2.4 đã được giới thiệu như một phiên bản **tinh chỉnh** của MultiWOZ 2.1, tập trung vào việc sửa các lỗi chú thích trong tập validation và tập test. MultiWOZ 2.4 đã được chứng minh là mang lại **hiệu suất cao hơn** cho các mô hình DST tiên tiến, đồng thời tạo ra một môi trường đánh giá **chính xác và đáng tin cậy** hơn.
-
-Mặc dù các phương pháp DST phức tạp đã đạt được những thành tựu đáng kể, việc phát triển một phương pháp **đơn giản và hiệu quả** vẫn là một **thách thức**, đặc biệt là khi xử lý các tập dữ liệu lớn và phức tạp như MultiWOZ 2.4.
-
-Trong nghiên cứu này, chúng tôi đề xuất một phương pháp **đơn giản** cho DST trên tập dữ liệu MultiWOZ 2.4. Nghiên cứu này tập trung vào:
-
-*   **Giới thiệu một phương pháp DST mới:** Phương pháp này được thiết kế đơn giản, dễ hiểu và triển khai, đồng thời vẫn đảm bảo hiệu quả trong việc theo dõi trạng thái hội thoại trên tập dữ liệu MultiWOZ 2.4.
-*   **Đánh giá hiệu suất của phương pháp:** Chúng tôi sẽ đánh giá phương pháp được đề xuất trên tập dữ liệu MultiWOZ 2.4, sử dụng các chỉ số đánh giá tiêu chuẩn như độ chính xác mục tiêu chung (Joint Goal Accuracy) và độ chính xác slot (Slot Accuracy).
-*   **So sánh với các phương pháp DST hiện có:**  Kết quả của phương pháp được đề xuất sẽ được so sánh với các phương pháp DST tiên tiến khác đã được đánh giá trên MultiWOZ 2.4 để chứng minh tính hiệu quả và khả năng cạnh tranh của phương pháp.
-
-Nghiên cứu này hy vọng đóng góp một phương pháp DST **đơn giản, hiệu quả và dễ tiếp cận** cho cộng đồng nghiên cứu, giúp **giảm bớt rào cản** trong việc áp dụng DST vào các ứng dụng thực tế.
 
 # Results
 
