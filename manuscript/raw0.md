@@ -365,6 +365,205 @@ prompt = f"""
 
 # Results
 
+Nhin chung ca phuong phap 1 va phuong phap 2 dung trong bao cao nay deu la khong su dung ontology.
+Phuong phap 1 su dung embedding (Glove va TinyBert) va LSTM de giai quyet 2 nhiem vu phan loai act type va slot type.
+Phuong phap 2 su dung LLM de giai quyet 2 nhiem vu nay thong qua toi uu hoa prompt ma khong trai qua qua trinh huan luyen.
+
+## Phuong phap 1:
+
+Voi bai toan slot classification - Seq2Seq:
+Do do               S1 model             S2 model
+accuracy              0.96                  0.93
+macro F1              0.10                  0.41
+weighted F1           0.94                  0.92
+
+Voi bai toan act classification - Multi label classification:
+Do do               S1 model             S2 model
+accuracy              0.21                  0.28
+
+Binh luan:
+Ket qua thu duoc tren tap test cua MultiWOZ 2.2 cho thay:
+Nhin chung model S2 voi 15 trieu tham so cho ket qua tot hon so voi model S1 voi 800k tham so.
+Do cac nhan du lieu mat can bang nen macro F1 thap, trong khi weighted F1 cao. Can cai thien model de can bang cac nhan thieu so hon.
+Do chinh xac phan loai da nhan cho bai toan act type classification cung thap. Mot mat vi chua su dung vector hoa toan bo cau ma moi chi dung cac token rieng le.
+Mat khac vi la model ket hop 2 nhanh nen se kho toi uu hon cho 1 nhanh cu the cua model.
+Giai phap o day la cai thien ham loss tong the de model tap trung hoc tot ben nhanh act type nhieu hon.
+
+## Phuong phap 2:
+
+Viec su dung prompt hop ly voi 1 model tao sinh LLM cho ket qua (cam nhan) tot hon so voi phuong phap 1.
+Ly do dau tien chac chan do so luong tham so nhieu hon, model da duoc hoc qua rat nhieu van ban cua nhieu ngon ngu khac nhau roi.
+
+Sau day la ket qua demo viec su dung phuong phap 2.
+
+Cho ngon ngu la tieng Viet:
+
+```bash
+python main.py --tasks use_llm
+Input current turn (or type 'q' to quit): Chào hệ thống. Tôi muốn đặt dịch vụ cho thứ Hai tới. Tôi sẽ đi tàu từ Hải Dương đến Hà Nội lúc 9h sáng, sau đó khám bệnh tại bệnh viện 108 vào lúc 15h, khám xong tầm 18h. Sau đó tôi muốn đặt một nhà hàng Pháp ở phố cổ cho bữa tối.
+Extracted dialog state for current turn:
+```json
+{
+  "act_type": ["Train-Inform", "Hospital-Inform", "Restaurant-Inform"],
+  "slot_type": {
+    "day": "thứ Hai tới",
+    "departure": "Hải Dương",
+    "destination": "Hà Nội",
+    "leaveat": "9h sáng",
+    "bookday": "thứ Hai tới",
+    "department": "khám bệnh",
+    "booktime": "15h",
+    "type": "Pháp",
+    "area": "phố cổ",
+    "food": "bữa tối"
+  }
+}
+```
+
+Input current turn (or type 'q' to quit): Chào quý khách. Hệ thống đã ghi nhận yêu cầu của quý khách. Vậy quý khách muốn chúng tôi hỗ trợ đặt vé tàu từ Hải Dương đến Hà Nội chuyến 9h sáng thứ Hai, đặt lịch khám tại bệnh viện 108 vào 15h khám tuyến giáp đã hẹn trước, và đặt bàn tại nhà hàng Pháp ở phố cổ sau 18h đúng không ạ? Xin quý khách cho biết thêm thông tin về nhà hàng Pháp mong muốn (nếu có) hoặc chúng tôi sẽ gợi ý một số nhà hàng phù hợp.
+Extracted dialog state for current turn:
+```json
+{
+  "act_type": ["Train-OfferBook", "Hospital-Inform", "Restaurant-Recommend"],
+  "slot_type": {
+    "day": "thứ Hai",
+    "departure": "Hải Dương",
+    "destination": "Hà Nội",
+    "leaveat": "9h sáng",
+    "booktime": "15h",
+    "department": "tuyến giáp",
+    "name": "bệnh viện 108",
+    "food": "Pháp",
+    "area": "phố cổ",
+    "arriveby": "18h"
+  }
+}
+```
+
+Input current turn (or type 'q' to quit): Vâng đúng vậy. Về nhà hàng Pháp, tôi muốn một nhà hàng có không gian lãng mạn, có thể ngắm phố cổ. Nếu được, giá tầm trung thôi.
+Extracted dialog state for current turn:
+```json
+{
+  "act_type": ["Restaurant-Inform"],
+  "slot_type": {
+    "day": "thứ Hai",
+    "departure": "Hải Dương",
+    "destination": "Hà Nội",
+    "leaveat": "9h sáng",
+    "department": "tuyến giáp",
+    "booktime": "15h",
+    "area": "phố cổ",
+    "food": "Pháp",
+    "pricerange": "tầm trung",
+    "type": "lãng mạn",
+    "description": "có thể ngắm phố cổ"
+  }
+}
+```
+
+Input current turn (or type 'q' to quit): Dạ vâng, hệ thống đã tìm thấy một số nhà hàng Pháp phù hợp với yêu cầu của quý khách như "La Badiane", "Green Tangerine". Chúng tôi sẽ kiểm tra tình trạng bàn và xác nhận lại với quý khách trong giây lát. Về vé tàu và lịch khám bệnh, chúng tôi sẽ cập nhật thông tin ngay sau khi xác nhận đặt bàn nhà hàng. Quý khách vui lòng chờ.
+Extracted dialog state for current turn:
+```json
+{
+  "act_type": ["Train-OfferBook", "Hospital-Inform", "Restaurant-Recommend"],
+  "slot_type": {
+    "day": "thứ Hai",
+    "departure": "Hải Dương",
+    "destination": "Hà Nội",
+    "leaveat": "9h sáng",
+    "booktime": "15h",
+    "department": "tuyến giáp",
+    "type": "Pháp",
+    "area": "phố cổ",
+    "pricerange": "tầm trung",
+    "food": "bữa tối"
+  }
+}
+```
+
+Cho ngon ngu la tieng Anh:
+
+```bash
+python main.py --tasks use_llm
+Input current turn (or type 'q' to quit): Hello system. I'd like to book some services for next Monday. I'll be taking the train from Hai Duong to Hanoi at 9 am, then I have a medical appointment at Hospital 108 at 3 pm, which should finish around 6 pm. After that, I'd like to book a French restaurant in the Old Quarter for dinner.
+Extracted dialog state for current turn:
+```json
+{
+  "act_type": ["Train-Inform", "Hospital-Inform", "Restaurant-Inform"],
+  "slot_type": {
+    "day": "Monday",
+    "departure": "Hai Duong",
+    "destination": "Hanoi",
+    "leaveat": "9 am",
+    "department": "medical",
+    "name": "Hospital 108",
+    "booktime": "3 pm",
+    "arriveby": "6 pm",
+    "food": "French",
+    "area": "Old Quarter"
+  }
+}
+```
+
+Input current turn (or type 'q' to quit): Hello. The system has recorded your request. So you would like us to assist with booking a train ticket from Hai Duong to Hanoi for the 9 am trip on Monday, confirming your 3 pm thyroid appointment at Hospital 108, and making a dinner reservation at a French restaurant in the Old Quarter after 6 pm, is that correct? Could you please provide more information about the French restaurant you prefer (if any), or we can suggest some suitable options.
+Extracted dialog state for current turn:
+```json
+{
+  "act_type": ["Train-Book", "Hospital-Inform", "Restaurant-Recommend"],
+  "slot_type": {
+    "departure": "Hai Duong",
+    "destination": "Hanoi",
+    "day": "Monday",
+    "leaveat": "9 am",
+    "booktime": "3 pm",
+    "department": "thyroid",
+    "name": "Hospital 108",
+    "food": "French",
+    "area": "Old Quarter",
+    "arriveby": "6 pm"
+  }
+}
+```
+
+Input current turn (or type 'q' to quit): Yes, that's right. Regarding the French restaurant, I'd like one with a romantic atmosphere and a view of the Old Quarter. Preferably, something mid-range in price.
+Extracted dialog state for current turn:
+```json
+{
+  "act_type": ["Restaurant-Inform"],
+  "slot_type": {
+    "food": "French",
+    "area": "Old Quarter",
+    "pricerange": "mid-range",
+    "atmosphere": "romantic",
+    "view": "Old Quarter"
+  }
+}
+```
+
+Input current turn (or type 'q' to quit): Certainly. The system has found some French restaurants that match your requirements, such as "La Badiane" and "Green Tangerine". We will check their availability and confirm with you shortly. We will also update you on the train ticket and medical appointment confirmations as soon as the restaurant booking is confirmed. Please wait.
+Extracted dialog state for current turn:
+```json
+{
+  "act_type": ["Restaurant-Recommend", "Train-OfferBook", "Hospital-Inform"],
+  "slot_type": {
+    "day": "Monday",
+    "departure": "Hai Duong",
+    "destination": "Hanoi",
+    "leaveat": "9 am",
+    "department": "thyroid",
+    "booktime": "3 pm",
+    "area": "Old Quarter",
+    "food": "French",
+    "pricerange": "mid-range",
+    "arriveby": "6 pm",
+    "type": ["romantic atmosphere", "view of the Old Quarter"],
+    "name":["La Badiane", "Green Tangerine"]
+
+  }
+}
+```
+
+
 # Discussion
 
 # Conclusion
