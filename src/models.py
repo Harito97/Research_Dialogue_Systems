@@ -16,7 +16,8 @@ class S2_Model:
     def __init__(self, max_sequence_length, num_classes_slot, num_classes_act, bert_model, embedding_dim:int=128, dropout_rate:float=0.2):
         # Model (Sử dụng BERT embedding và dropout)
         input_seq = Input(shape=(max_sequence_length,), dtype="int32")
-        embedding = bert_model(input_seq)[0]
+        # embedding = bert_model(input_seq)[0]
+        embedding = bert_model(tf.cast(input_seq, dtype=tf.int32))[0] # Cast input_seq sang tf.int32
         bilstm = Bidirectional(LSTM(embedding_dim, return_sequences=True))(embedding) # Tăng số units
         bilstm = Dropout(dropout_rate)(bilstm) # Thêm dropout
 
