@@ -1,5 +1,5 @@
 ---
-title: "Sipmle Method For Dialogue State Tracking In MultiWOZ 2.4 Dataset"
+title: "Sipmle Method For Dialogue State Tracking In MultiWOZ 2.2 Dataset"
 author: "Phạm Ngọc Hải"
 date: "27/12/2024"
 fontsize: 12pt
@@ -12,11 +12,7 @@ lang: vi
 
 # Abstract
 
-<div>
-    <!--
-    pandoc raw0.md -o RawManuscript.pdf --pdf-engine=xelatex
-    -->
-</div>
+
 
 # Introduction
 
@@ -46,19 +42,6 @@ Trong trường hợp này, DST cần xác định:
 
   - Ngày đi: Ngày mai.
 
-Sự phát triển của các tập dữ liệu hội thoại đa miền (multi-domain dialogue datasets) quy mô lớn như MultiWOZ 2.0 đã thúc đẩy đáng kể nghiên cứu về DST. Tuy nhiên, các phiên bản MultiWOZ ban đầu thường chứa nhiễu (noise) trong các chú thích trạng thái, **gây khó khăn** cho việc đánh giá hiệu suất mô hình một cách chính xác và công bằng.
-Để giải quyết vấn đề này, MultiWOZ 2.4 đã được giới thiệu như một phiên bản **tinh chỉnh** của MultiWOZ 2.1, tập trung vào việc sửa các lỗi chú thích trong tập validation và tập test. MultiWOZ 2.4 đã được chứng minh là mang lại **hiệu suất cao hơn** cho các mô hình DST tiên tiến, đồng thời tạo ra một môi trường đánh giá **chính xác và đáng tin cậy** hơn.
-
-Mặc dù các phương pháp DST phức tạp đã đạt được những thành tựu đáng kể, việc phát triển một phương pháp **đơn giản và hiệu quả** vẫn là một **thách thức**, đặc biệt là khi xử lý các tập dữ liệu lớn và phức tạp như MultiWOZ 2.4.
-
-Trong nghiên cứu này, chúng tôi đề xuất một phương pháp **đơn giản** cho DST trên tập dữ liệu MultiWOZ 2.4. Nghiên cứu này tập trung vào:
-
-*   **Giới thiệu một phương pháp DST mới:** Phương pháp này được thiết kế đơn giản, dễ hiểu và triển khai, đồng thời vẫn đảm bảo hiệu quả trong việc theo dõi trạng thái hội thoại trên tập dữ liệu MultiWOZ 2.4.
-*   **Đánh giá hiệu suất của phương pháp:** Chúng tôi sẽ đánh giá phương pháp được đề xuất trên tập dữ liệu MultiWOZ 2.4, sử dụng các chỉ số đánh giá tiêu chuẩn như độ chính xác mục tiêu chung (Joint Goal Accuracy) và độ chính xác slot (Slot Accuracy).
-*   **So sánh với các phương pháp DST hiện có:**  Kết quả của phương pháp được đề xuất sẽ được so sánh với các phương pháp DST tiên tiến khác đã được đánh giá trên MultiWOZ 2.4 để chứng minh tính hiệu quả và khả năng cạnh tranh của phương pháp.
-
-Nghiên cứu này hy vọng đóng góp một phương pháp DST **đơn giản, hiệu quả và dễ tiếp cận** cho cộng đồng nghiên cứu, giúp **giảm bớt rào cản** trong việc áp dụng DST vào các ứng dụng thực tế.
-
 # Related Work
 
 ## Các Hướng Nghiên Cứu Chính
@@ -69,13 +52,6 @@ Nghiên cứu này hy vọng đóng góp một phương pháp DST **đơn giản
 - **Bản thể động (Dynamic Ontology):** Linh hoạt trong việc dự đoán các trạng thái mới (ví dụ: TRADE, TripPy, SOM-DST).
 
 **1. Phương Pháp Dựa Trên Ontology (Ontology-Based Methods):**
-
-<div>
-    <! ––
-    * **TRADE (Wu et al., 2019):** Sử dụng cơ chế copy để tạo trạng thái hội thoại và xác định giá trị slot từ lịch sử hội thoại.
-    * **SOM-DST (Kim et al., 2020):** Áp dụng phương pháp ghi nhớ chọn lọc để cập nhật thông tin hội thoại.
-    ––>
-</div>
 
 - **Ý tưởng:** Các phương pháp này sử dụng một ontology chứa tập giá trị slot được xác định trước, từ đó dự đoán giá trị slot dựa trên danh sách các giá trị khả dĩ.
 - **Ưu điểm:** Phù hợp với các hệ thống có miền xác định rõ ràng, đơn giản và dễ triển khai.
@@ -180,6 +156,19 @@ Nghiên cứu này hy vọng đóng góp một phương pháp DST **đơn giản
 - **Phát Triển Phương Pháp Đánh Giá Mới:** Tập trung vào các yếu tố như khả năng hiểu ngữ cảnh, xử lý thông tin đa modal và khả năng thích ứng.
 
 # Method
+
+Sự phát triển của các tập dữ liệu hội thoại đa miền (multi-domain dialogue datasets) quy mô lớn như MultiWOZ 2.0 đã thúc đẩy đáng kể nghiên cứu về DST. Tuy nhiên, các phiên bản MultiWOZ ban đầu thường chứa nhiễu (noise) trong các chú thích trạng thái, **gây khó khăn** cho việc đánh giá hiệu suất mô hình một cách chính xác và công bằng.
+Để giải quyết vấn đề này, MultiWOZ 2.4 đã được giới thiệu như một phiên bản **tinh chỉnh** của MultiWOZ 2.1, tập trung vào việc sửa các lỗi chú thích trong tập validation và tập test. MultiWOZ 2.4 đã được chứng minh là mang lại **hiệu suất cao hơn** cho các mô hình DST tiên tiến, đồng thời tạo ra một môi trường đánh giá **chính xác và đáng tin cậy** hơn.
+
+Mặc dù các phương pháp DST phức tạp đã đạt được những thành tựu đáng kể, việc phát triển một phương pháp **đơn giản và hiệu quả** vẫn là một **thách thức**, đặc biệt là khi xử lý các tập dữ liệu lớn và phức tạp như MultiWOZ 2.4.
+
+Trong nghiên cứu này, chúng tôi đề xuất một phương pháp **đơn giản** cho DST trên tập dữ liệu MultiWOZ 2.4. Nghiên cứu này tập trung vào:
+
+*   **Giới thiệu một phương pháp DST mới:** Phương pháp này được thiết kế đơn giản, dễ hiểu và triển khai, đồng thời vẫn đảm bảo hiệu quả trong việc theo dõi trạng thái hội thoại trên tập dữ liệu MultiWOZ 2.4.
+*   **Đánh giá hiệu suất của phương pháp:** Chúng tôi sẽ đánh giá phương pháp được đề xuất trên tập dữ liệu MultiWOZ 2.4, sử dụng các chỉ số đánh giá tiêu chuẩn như độ chính xác mục tiêu chung (Joint Goal Accuracy) và độ chính xác slot (Slot Accuracy).
+*   **So sánh với các phương pháp DST hiện có:**  Kết quả của phương pháp được đề xuất sẽ được so sánh với các phương pháp DST tiên tiến khác đã được đánh giá trên MultiWOZ 2.4 để chứng minh tính hiệu quả và khả năng cạnh tranh của phương pháp.
+
+Nghiên cứu này hy vọng đóng góp một phương pháp DST **đơn giản, hiệu quả và dễ tiếp cận** cho cộng đồng nghiên cứu, giúp **giảm bớt rào cản** trong việc áp dụng DST vào các ứng dụng thực tế.
 
 # Results
 

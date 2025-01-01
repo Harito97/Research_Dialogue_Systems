@@ -1,1 +1,5 @@
 tf-keras
+tensorflow
+scikit-learn
+transformers
+datasets
