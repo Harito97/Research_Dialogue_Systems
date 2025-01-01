@@ -16,7 +16,7 @@ from tensorflow.keras.layers import Input, Lambda
 class S2_Model:
     def __init__(self, max_sequence_length, num_classes_slot, num_classes_act, bert_model, embedding_dim:int=128, dropout_rate:float=0.2):
         # Model (Sử dụng BERT embedding và dropout)
-        input_seq = Input(shape=(max_sequence_length, 310,), dtype="int32")
+        input_seq = Input(shape=(max_sequence_length, 312,), dtype="int32")
         # embedding = bert_model(input_seq)[0]
         # Sử dụng Lambda layer để ép kiểu
         # input_seq_casted = Lambda(lambda x: tf.cast(x, dtype=tf.int32))(input_seq)
