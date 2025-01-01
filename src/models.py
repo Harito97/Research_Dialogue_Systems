@@ -163,7 +163,7 @@ class S2_Model:
         print("Action Classification Metrics:")
         print(
             multilabel_confusion_matrix(
-                y_test_act_one_hot, y_pred_action_labels, zero_division=0
+                y_test_act_one_hot, y_pred_action_labels,  # zero_division=0
             )
         )
 
